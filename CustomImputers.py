@@ -70,7 +70,7 @@ class Custom_MICE_Imputer(BaseEstimator, TransformerMixin):
 
     
     # For my fit method I'm just going to "steal" IterativeImputers's fit method using a curated collection of predictors
-    def fit(self, X, y = None, Z ):
+    def fit(self, Z, y = None):
         feature_list = Z.columns.tolist()
         if 'id' in feature_list:
             feature_list.remove('id')
@@ -84,7 +84,7 @@ class Custom_MICE_Imputer(BaseEstimator, TransformerMixin):
         return self
     
     # Now I want to transform the columns in feature list and return it with imputed values that have been un-transformed
-    def transform(self, X, y = None, Z):
+    def transform(self, Z, y = None):
         feature_list = Z.columns.tolist()
         if 'id' in feature_list:
             feature_list.remove('id')
