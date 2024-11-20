@@ -32,6 +32,8 @@ class Custom_KNN_Imputer(BaseEstimator, TransformerMixin):
         feature_list = [x for x in feature_list if 'PCIAT' not in x]
         feature_list = [x for x in feature_list if 'Zone' not in x]
         feature_list = [x for x in feature_list if 'Season' not in x]
+        # Reset the index in X
+        X = X.reset_index(drop=True)
         self.StandardScaler.fit(X[feature_list])
         # I'm never sure if we need the .values and/or .reshape(-1,1)
         #self.KNNImputer.fit(X[feature_list].values.reshape(-1,1))
@@ -48,7 +50,7 @@ class Custom_KNN_Imputer(BaseEstimator, TransformerMixin):
         feature_list = [x for x in feature_list if 'PCIAT' not in x]
         feature_list = [x for x in feature_list if 'Zone' not in x]
         feature_list = [x for x in feature_list if 'Season' not in x]
-        copy_X = X.copy()
+        copy_X = X.copy().reset_index(drop=True)
         copy_X[feature_list] = self.KNNImputer.transform(copy_X[feature_list])
         copy_X2 = self.StandardScaler.inverse_transform(copy_X[feature_list])
         df2 = pd.DataFrame(copy_X2, columns=feature_list)
@@ -68,8 +70,8 @@ class Custom_MICE_Imputer(BaseEstimator, TransformerMixin):
 
     
     # For my fit method I'm just going to "steal" IterativeImputers's fit method using a curated collection of predictors
-    def fit(self, X, y = None ):
-        feature_list = X.columns.tolist()
+    def fit(self, X, y = None, Z ):
+        feature_list = Z.columns.tolist()
         if 'id' in feature_list:
             feature_list.remove('id')
         if 'sii' in feature_list:
@@ -77,12 +79,13 @@ class Custom_MICE_Imputer(BaseEstimator, TransformerMixin):
         feature_list = [x for x in feature_list if 'PCIAT' not in x]
         feature_list = [x for x in feature_list if 'Zone' not in x]
         feature_list = [x for x in feature_list if 'Season' not in x]
-        self.MICEImputer.fit(X[feature_list])
+        Z = Z.reset_index(drop=True)
+        self.MICEImputer.fit(Z[feature_list])
         return self
     
     # Now I want to transform the columns in feature list and return it with imputed values that have been un-transformed
-    def transform(self, X, y = None):
-        feature_list = X.columns.tolist()
+    def transform(self, X, y = None, Z):
+        feature_list = Z.columns.tolist()
         if 'id' in feature_list:
             feature_list.remove('id')
         if 'sii' in feature_list:
@@ -90,11 +93,12 @@ class Custom_MICE_Imputer(BaseEstimator, TransformerMixin):
         feature_list = [x for x in feature_list if 'PCIAT' not in x]
         feature_list = [x for x in feature_list if 'Zone' not in x]
         feature_list = [x for x in feature_list if 'Season' not in x]
-        copy_X = X.copy()
-        df2 = self.MICEImputer.transform(copy_X[feature_list])
+        copy_Z = Z.copy()
+        copy_Z = copy_Z.reset_index(drop=True)
+        df2 = self.MICEImputer.transform(copy_Z[feature_list])
         df3 = pd.DataFrame(df2, columns=feature_list)
-        copy_X[feature_list]=copy_X[feature_list].fillna(df3[feature_list])
-        return copy_X
+        copy_Z[feature_list]=copy_Z[feature_list].fillna(df3[feature_list])
+        return copy_Z
     
 
 ####Now defining zone functions.
