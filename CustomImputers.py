@@ -258,7 +258,3 @@ def zone_encoder(df):
         else:
             df_copy['PAQ_Zone'] = df_copy.apply(lambda x: paqzone(x['Basic_Demos-Age'], x['PAQ_Total']), axis=1)
     return df_copy    
-
-def sii_converter(pred, bins):
-    pred_binned = np.digitize(pred, bins)-1
-    return pred_binned
