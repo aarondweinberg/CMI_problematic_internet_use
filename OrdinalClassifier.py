@@ -11,6 +11,7 @@
 
 from sklearn.base import clone
 from sklearn.metrics import accuracy_score
+import numpy as np
 
 class OrdinalClassifier():
 
