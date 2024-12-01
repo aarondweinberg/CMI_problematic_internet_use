@@ -5,9 +5,9 @@
 #We'll create a class that first predicts whether or not the sii value is 0, then continues upward...
 #Note that this isn't quite the same as creating four separate binary predictors for 0, 1, 2, and 3 outcomes.
 
-# Although we did come up with this idea, we weren't the first. It was described on Medium: https://towardsdatascience.com/simple-trick-to-train-an-ordinal-regression-with-any-classifier-6911183d2a3c from an article by Frank and Hal
-# Also described on stackoverflow: https://stackoverflow.com/questions/57561189/multi-class-multi-label-ordinal-classification-with-sklearn
-# Some discussion of the proposed code that highlights some of its issues is on stackoverflow: https://stackoverflow.com/questions/66486947/how-to-use-ordinal-classifier
+# There have been numerous ordinal classification algorithms proposed (see, e.g., https://www.sciencedirect.com/science/article/pii/S0888613X16300706)
+# We decided to use an algorithm that was proposed by Frank and Hall in 2001 (https://link.springer.com/chapter/10.1007/3-540-44795-4_13)
+# (In large part because it was relatively straightforward to use)
 
 from sklearn.base import clone
 from sklearn.metrics import accuracy_score
