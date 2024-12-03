@@ -1,30 +1,40 @@
-# CMI_problematic_internet_use
-Collaboration to investigate the Problematic Internet Use dataset from the Child Mind Institute
+# Predicting Problematic Internet Use
 
-## Initial Project Description
+## Team members
+[Aaron Weinberg](https://github.com/aarondweinberg)  
+[Emilie Wiesner](https://github.com/ewiesner)  
+[Daniel Visscher](https://github.com/danielvisscher)
 
-The problem and data set we are working on are based on a data competition posted to the competition platform Kaggle.com.  The data comes from the Child Mind Institute, with the goal of developing a mechanism to predict and identify problematic internet usage among adolescents without the need for highly specialized evaluation by professionals.
+## Introduction
+Internet use has been identified by researchers as having the potential to rise to the level of addiction, with associated increased rates of anxiety and depression. Identifying cases of problematic internet usage currently requires evaluation by an expert, however, which is a significant impediment to screening children and adolescents across society. One potential solution is to rely on an assortment of data that is more easily and uniformly collected: the kind collected by a family physician or by a smartwatch. The research question this project sets out to answer is: “Can we predict the level of problematic internet usage exhibited by children and adolescents, based on their physical activity and survey responses?” 
 
-The data provided includes 82 variables for 3960 participants. Variables include 
--	Demographic data (age, sex)
--	Physical characteristics (height, weight, waist, BMI, blood pressure, pulse rate)
--	Results of a fitness test (for example: grip strength, an endurance time measure)
--	Bio-electric Impedance Analysis results (for example: bone mineral content, body fat percentage)
--	Physical activity score (in response to a questionnaire)
--	Responses to an internet addiction survey 
--	Sleep disturbance score
--	Internet time usage score
--	Target variable: severity impairment index. (This categorical variable is based on the total score on the internet addiction survey.)
+## Dataset
+The data comes from a research study conducted by the Child-Mind Institute, with data for 3960 participants. The target variable is a severity impairment index (SII) that measures problematic internet use on a scale from 0 (no impairment) to 3 (severe impairment). There are 33 predictor variables, including demographics (e.g., age, sex), physical measurements often taken by a family physician (e.g., height, weight, blood pressure), results of a fitness test (e.g., sit & reach, endurance time), survey responses and scales (e.g., internet usage in hours per day, sleep disturbance, children’s global assessment), and measures from a bio-electric impedance analysis (e.g., bone mineral content, fat mass index). Additionally, about one month of accelerometer data was provided for almost one thousand of the participants in 5-second intervals. Significantly, participants often completed some parts of the study but not others, so any given participant will have entire groups of variables missing. 
 
-Additionally, some participants wore accelerometer data for one month. The data provided from these participants includes ENMO and light data at 5-second intervals.
+## Preprocessing
+Participants were dropped if they did not have an SII score (about a third of the participants). The distribution of remaining SII scores is very skewed: over half of participants had an SII score of 0, while only 30 (about 1% of) participants who were measured had an SII score of 3. For each input variable, we found benchmarks to identify extreme values and removed these. Because many variables had high correlation with other variables, we engaged in several rounds of feature reduction and identified important features using a random forest.
 
-There is considerable missing data in the set. We only have accelerometer data for XX participants. For non-demographic variables, we only have data from  740 to ~3000 participants (with wide variation.)
+## Model Selection and Results
+We compared models using Cohen’s kappa function. This function measures the accuracy of prediction for ordinal variables, with random guessing producing a score of 0, scores of 0.4-0.6 indicating moderate or fair agreement levels, and scores above 0.75 producing excellent agreement.
+We designed an iterative imputer for missing predictor values, a function transformer to compute activity zones for various predictors, and an algorithm to sequentially apply classifiers to ordinal data. We then ran a pipe that first imputed and computed predictors, oversampled the sii=3 class using a Synthetic Minority Oversampling TEchnique, and made predictions using a variety of models. Cohen’s kappa indicated that using gradient boost to predict PCIAT scores and then modified bins to convert to sii scores had the best kappa score of 0.448.
+For our final model we used a tuned gradient boosting regressor. This took our test data and used it to predict PCIAT values and then used custom-tuned bins to compute SII values. This resulted in a kappa value of 0.456, suggesting that our model avoided overfitting but was only able to come up with a moderate amount of agreement.
 
-The primary stakeholder for this project is the Child Mind Institute. Secondary stakeholders could include parents, professionals (family doctors, teachers, counselors), and policy-makers who seek to identify or predict problematic internet usage among adolescents. 
-
-## Key Performance Indicators
-The competition has withheld a portion of the data collected to serve as a final test set. After submitting our model(s), they will evaluate the model on this withheld data using an internally defined fit measure. **I don’t have a good understanding of the measure to say much more than this, beyond just copying over the rather long description of this measure.**  
-
-Our models will first predict the PCIAT score (between 0 and 100) for each participant. We will preliminarily use the MSE (mean squared error) to determine the goodness of fit for these models, calculated for the participants that have a PCIAT score (only about 2/3 of the data comes labeled).
-
-The PCIAT score determines the sii score (between 0 and 3) by bins; this sii score is officially what we are trying to predict. In line with the Kaggle competition, we will use the "quadratic weighted kappa" score to determine goodness of fit for an sii-predicting model. This is a score that "measures agreement" between predicted and actual outcomes, with 0 denoting random agreement, 1 total agreement, and negative numbers worse than random.
+## Files
+### Notebooks:
+-	[`Accelerometer_Computations.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Accelerometer_Computations.ipynb) computes predictors from the actigraphy data
+-	[`Data_Cleaning.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Data_Cleaning.ipynb) cleans the data
+-	[`Feature_Importance.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Feature_Importance.ipynb) identifies a list of “key features” to use in multiple linear regression
+-	[`Feature_Reduction.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Feature_Reduction.ipynb) removes highly-correlated and problematic predictors
+-	[`Model_Selection.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Model_Selection.ipynb) tests out-of-the-box performance for a collection of models, tunes, and re-tests the models
+-	[`Model_Final_Performance.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Model_Selection.ipynb) runs and analyzes our final model, a tuned gradient boosting regressor, on the reserved testing data
+-	[`Outcome_Imputing.ipynb`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/Outcome_Imputing.ipynb) imputes missing values of PCIAT scores
+###	Custom classes:
+-	[`CustomImputers.py`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/CustomImputers.py) includes classes for doing our iterative imputing and computation of Zone predictors
+-	[`OrdinalClassifier.py`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/OrdinalClassifier.py) includes a class that “wraps” a classifier in an algorithm that performs ordinal classification based on a method proposed by Frank and Hal (2001)
+###	CSV files:
+-	[`train_original.csv`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/train_original.csv) is the data file downloaded from Kaggle
+-	`train` and `test` are an 80/20% split of train_original
+-	[`train_cleaned.csv`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/CSV_Files_For_Modeling/train_cleaned.csv) is train after being processed by Data_Cleaning
+-	[`train_cleaned_outcome_imputed.csv`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/CSV_Files_For_Modeling/train_cleaned_outcome_imputed.csv) is train_cleaned after being processed by Outcome_Imputing
+-	[`train_cleaned_outcom_imputed_feature_selected.csv`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/CSV_Files_For_Modeling/train_cleaned_outcome_imputed_feature_selected.csv) is the result of processing by Feature_Reduction
+-	[`Accelerometer_enmo_anglez_daily_averages.csv`](https://github.com/aarondweinberg/CMI_problematic_internet_use/blob/main/CSV_Files_For_Modeling/Accelerometer_enmo_anglez_daily_averages.csv) is the predictors generated from the actigraphy data
